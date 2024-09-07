@@ -1,8 +1,10 @@
-[gd_scene load_steps=2 format=3 uid="uid://dq41i8vjrw3av"]
+[gd_scene load_steps=3 format=3 uid="uid://dg6rv356d3qj5"]
 
 [ext_resource type="Texture2D" uid="uid://o60ibguctnm4" path="res://assets/pieces/Pink Column.png" id="1_msj7k"]
+[ext_resource type="PackedScene" uid="uid://dimhfx4c1igfv" path="res://scenes/piece.tscn" id="1_via08"]
 
-[node name="PinkColumn" type="Node2D"]
+[node name="PinkColumn" instance=ExtResource("1_via08")]
+color = "pink"
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="Sprite2D" parent="." index="0"]
 texture = ExtResource("1_msj7k")

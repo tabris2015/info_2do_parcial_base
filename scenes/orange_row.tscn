@@ -1,8 +1,9 @@
-[gd_scene load_steps=2 format=3 uid="uid://vqubhgrq0xad"]
+[gd_scene load_steps=3 format=3 uid="uid://cjvjs6i1vuwb7"]
 
 [ext_resource type="Texture2D" uid="uid://bg2lncm7m06a5" path="res://assets/pieces/Orange Row.png" id="1_6siqw"]
+[ext_resource type="PackedScene" uid="uid://dimhfx4c1igfv" path="res://scenes/piece.tscn" id="1_a8nrh"]
 
-[node name="OrangeRow" type="Node2D"]
+[node name="OrangeRow" instance=ExtResource("1_a8nrh")]
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="Sprite2D" parent="." index="0"]
 texture = ExtResource("1_6siqw")

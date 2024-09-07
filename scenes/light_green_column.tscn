@@ -1,8 +1,10 @@
-[gd_scene load_steps=2 format=3 uid="uid://c4k3wlla3f74l"]
+[gd_scene load_steps=3 format=3 uid="uid://cf4hmnwn2ylqh"]
 
+[ext_resource type="PackedScene" uid="uid://dimhfx4c1igfv" path="res://scenes/piece.tscn" id="1_2s2yy"]
 [ext_resource type="Texture2D" uid="uid://ce47mf6vf03ew" path="res://assets/pieces/Light Green Column.png" id="1_kft0o"]
 
-[node name="LightGreenColumn" type="Node2D"]
+[node name="LightGreenColumn" instance=ExtResource("1_2s2yy")]
+color = "light_green"
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="Sprite2D" parent="." index="0"]
 texture = ExtResource("1_kft0o")

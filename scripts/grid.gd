@@ -39,12 +39,12 @@ var striped_pieces_horizontal = {
 	"green": preload("res://scenes/green_piece_row.tscn"),
 	"light_green": preload("res://scenes/light_green_row.tscn"),
 	"pink": preload("res://scenes/pink_row.tscn"),
-	"yellow": preload("res://scenes/yellow_piece_row.tscn"),
+	"yellow": preload("res://scenes/yellow_row.tscn"),
 	"orange": preload("res://scenes/orange_row.tscn"),
 }
 
 var striped_pieces_vertical = {
-	"blue": preload("res://scenes/blue_piece_colum.tscn"),
+	"blue": preload("res://scenes/blue_piece_column.tscn"),
 	"green": preload("res://scenes/green_piece_column.tscn"),
 	"light_green": preload("res://scenes/light_green_column.tscn"),
 	"pink": preload("res://scenes/pink_column.tscn"),
@@ -108,7 +108,6 @@ func transition_to_moves_mode():
 	state = MOVE
 	start_moves_mode()  
 	game_timer.stop()  
-	
 
 func make_2d_array():
 	var array = []
@@ -192,8 +191,7 @@ func swap_pieces(column, row, direction: Vector2):
 		other_piece.move(grid_to_pixel(column, row))
 		if not move_checked:
 			find_matches()
-			
-		decrement_moves()
+			decrement_moves()
 	else :
 		game_over()
 
@@ -229,36 +227,29 @@ func find_matches():
 			if all_pieces[i][j] != null:
 				var current_color = all_pieces[i][j].color
 				# detectar 4 piezas juntas horizontalmente
-				#if (
-					#i > 0 and i < width - 3 
-					#and 
-					#all_pieces[i - 1][j] != null and all_pieces[i + 1][j] != null and all_pieces[i + 2][j] != null and all_pieces[i + 3][j] != null
-					#and 
-					#all_pieces[i - 1][j].color == current_color and all_pieces[i + 1][j].color == current_color and all_pieces[i + 2][j].color == current_color and all_pieces[i + 3][j].color == current_color
-				#):
-					## Crear pieza especial horizontal
-					#create_special_piece(i, j, current_color, true)
-					#all_pieces[i - 1][j].matched = true
-					#all_pieces[i + 1][j].matched = true
-					#all_pieces[i + 2][j].matched = true
-					#all_pieces[i + 3][j].matched = true
-					#all_pieces[i][j].matched = true
-				## detectar 4 piezas juntas verticalmente
-				#if (
-					#j > 0 and j < height - 3 
-					#and 
-					#all_pieces[i][j - 1] != null and all_pieces[i][j + 1] != null and all_pieces[i][j + 2] != null and all_pieces[i][j + 3] != null
-					#and 
-					#all_pieces[i][j - 1].color == current_color and all_pieces[i][j + 1].color == current_color and all_pieces[i][j + 2].color == current_color and all_pieces[i][j + 3].color == current_color
-				#):
-					## Crear pieza especial vertical
-					#create_special_piece(i, j, current_color, false)
-					#all_pieces[i][j - 1].matched = true
-					#all_pieces[i][j + 1].matched = true
-					#all_pieces[i][j + 2].matched = true
-					#all_pieces[i][j + 3].matched = true
-					#all_pieces[i][j].matched = true
-				# detect horizontal matches
+				if (
+					i <= width - 4 # Asegúrate de que hay suficiente espacio para comparar 4 piezas
+					and 
+					all_pieces[i + 1] != null and all_pieces[i + 2] != null and all_pieces[i + 3] != null
+					and 
+					all_pieces[i + 1][j] != null and all_pieces[i + 2][j] != null and all_pieces[i + 3][j] != null
+					and 
+					all_pieces[i + 1][j].color == current_color and all_pieces[i + 2][j].color == current_color and all_pieces[i + 3][j].color == current_color
+				):
+					print("4 piezas horizontales encontradas en", i, j)
+					#print("El color de la pieza es: ", current_color)
+					create_special_piece(i, j, current_color, true)
+				if (
+					j <= height - 4 # Asegúrate de que hay suficiente espacio para comparar 4 piezas
+					and 
+					all_pieces[i][j + 1] != null and all_pieces[i][j + 2] != null and all_pieces[i][j + 3] != null
+					and 
+					all_pieces[i][j + 1].color == current_color and all_pieces[i][j + 2].color == current_color and all_pieces[i][j + 3].color == current_color
+				):
+					print("4 piezas verticales encontradas en", i, j)
+					#print("El color de la pieza es: ", current_color)
+					create_special_piece(i, j, current_color, false)
+				 #detect horizontal matches
 				if (
 					i > 0 and i < width -1 
 					and 
@@ -291,35 +282,25 @@ func find_matches():
 
 func create_special_piece(column, row, color, is_horizontal):
 	var special_piece_scene = null
-	
 	print("Color recibido: ", color)
-	
 	if is_horizontal:
-		special_piece_scene = striped_pieces_horizontal.get(color, null)
-	else:
 		special_piece_scene = striped_pieces_vertical.get(color, null)
-
+	else:
+		special_piece_scene = striped_pieces_horizontal.get(color, null)
 	if special_piece_scene == null:
 		print("No se encontró una pieza especial para el color: ", color)
 		return
-	
 	var special_piece = special_piece_scene.instantiate()
 	if special_piece == null:
 		print("Error al instanciar la pieza especial para el color: ", color)
 		return
-	
 	print("Pieza especial creada para el color: ", color)
-	
 	add_child(special_piece)
 	special_piece.position = grid_to_pixel(column, row)
-	
-	# Verificar si se agregó a la escena correctamente
 	if is_instance_valid(special_piece):
 		print("Pieza especial añadida correctamente en la posición: ", column, row)
 	else:
 		print("Error al añadir la pieza especial al árbol de nodos.")
-	
-	# Actualizar la matriz de piezas
 	all_pieces[column][row] = special_piece
 
 func destroy_matched():
@@ -329,10 +310,9 @@ func destroy_matched():
 		for j in height:
 			if all_pieces[i][j] != null and all_pieces[i][j].matched:
 				was_matched = true
-				points += 5
 				all_pieces[i][j].queue_free()
 				all_pieces[i][j] = null
-				
+	points += 5
 	move_checked = true
 	if was_matched:
 		update_score(points)
@@ -403,7 +383,7 @@ func decrement_moves():
 	top_ui.counter_label.text = str(current_count) 
 	if current_count <= 0:
 		game_over()
-		
+
 func game_over():
 	state = WAIT
 	if is_time_mode:

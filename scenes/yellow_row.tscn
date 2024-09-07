@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://dhts1ognorngl"]
+
+[ext_resource type="PackedScene" uid="uid://dimhfx4c1igfv" path="res://scenes/piece.tscn" id="1_mfgif"]
+[ext_resource type="Texture2D" uid="uid://cqdirtw6x1hj5" path="res://assets/pieces/Yellow Row.png" id="2_i8614"]
+
+[node name="YellowRow" instance=ExtResource("1_mfgif")]
+color = "yellow"
+
+[node name="Sprite2D" parent="." index="0"]
+texture = ExtResource("2_i8614")

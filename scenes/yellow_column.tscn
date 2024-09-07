@@ -1,8 +1,10 @@
-[gd_scene load_steps=2 format=3 uid="uid://clgtdms6ewbq8"]
+[gd_scene load_steps=3 format=3 uid="uid://bd0bgolw2ccaf"]
 
 [ext_resource type="Texture2D" uid="uid://y438i6ufrn27" path="res://assets/pieces/Yellow Column.png" id="1_aqbvh"]
+[ext_resource type="PackedScene" uid="uid://dimhfx4c1igfv" path="res://scenes/piece.tscn" id="1_pi8po"]
 
-[node name="YellowColumn" type="Node2D"]
+[node name="YellowColumn" instance=ExtResource("1_pi8po")]
+color = "yellow"
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="Sprite2D" parent="." index="0"]
 texture = ExtResource("1_aqbvh")
