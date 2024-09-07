@@ -37,13 +37,18 @@ var final_touch = Vector2.ZERO
 var is_controlling = false
 
 # scoring variables and signals
-
+var score = 0
+signal score_changed(new_score)
 
 # counter variables and signals
+var minus_moves = 1
+signal moves_left_changed(new_moves)
+
 
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	print("Nodo padre: ", get_parent().name)
 	state = MOVE
 	randomize()
 	all_pieces = make_2d_array()
@@ -128,8 +133,12 @@ func swap_pieces(column, row, direction: Vector2):
 	#other_piece.position = grid_to_pixel(column, row)
 	first_piece.move(grid_to_pixel(column + direction.x, row + direction.y))
 	other_piece.move(grid_to_pixel(column, row))
+	
 	if not move_checked:
-		find_matches()
+		var isFind = find_matches()
+		if isFind:
+			# Restar una jugada
+			emit_signal("moves_left_changed", minus_moves)
 
 func store_info(first_piece, other_piece, place, direction):
 	piece_one = first_piece
@@ -162,6 +171,7 @@ func _process(delta):
 		touch_input()
 
 func find_matches():
+	var matches_found = false
 	for i in width:
 		for j in height:
 			if all_pieces[i][j] != null:
@@ -180,6 +190,9 @@ func find_matches():
 					all_pieces[i][j].dim()
 					all_pieces[i + 1][j].matched = true
 					all_pieces[i + 1][j].dim()
+					score += 30 
+					emit_signal("score_changed", score)
+					matches_found = true
 				# detect vertical matches
 				if (
 					j > 0 and j < height -1 
@@ -194,8 +207,12 @@ func find_matches():
 					all_pieces[i][j].dim()
 					all_pieces[i][j + 1].matched = true
 					all_pieces[i][j + 1].dim()
+					score += 30 
+					emit_signal("score_changed", score)
+					matches_found = true
 					
 	get_parent().get_node("destroy_timer").start()
+	return matches_found
 	
 func destroy_matched():
 	var was_matched = false
@@ -209,6 +226,7 @@ func destroy_matched():
 	move_checked = true
 	if was_matched:
 		get_parent().get_node("collapse_timer").start()
+		
 	else:
 		swap_back()
 
