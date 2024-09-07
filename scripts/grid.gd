@@ -1,7 +1,7 @@
 extends Node2D
 
 # state machine
-enum {WAIT, MOVE}
+enum {WAIT, MOVE, TIME}
 var state
 
 # grid
@@ -12,6 +12,18 @@ var state
 @export var offset: int
 @export var y_offset: int
 
+#puntae
+@onready var top_ui = get_parent().get_node("top_ui") 
+var current_score = 0
+
+#niveles
+@onready var game_timer: Timer = $"../game_timer"
+var game_time_limit = 60 
+var current_count = 10
+@export var time_limit: int = 60  
+var remaining_time: float = 0.0 
+var is_time_mode: bool = false  
+
 # piece array
 var possible_pieces = [
 	preload("res://scenes/blue_piece.tscn"),
@@ -21,6 +33,25 @@ var possible_pieces = [
 	preload("res://scenes/yellow_piece.tscn"),
 	preload("res://scenes/orange_piece.tscn"),
 ]
+
+var striped_pieces_horizontal = {
+	"blue": preload("res://scenes/blue_piece_row.tscn"),
+	"green": preload("res://scenes/green_piece_row.tscn"),
+	"light_green": preload("res://scenes/light_green_row.tscn"),
+	"pink": preload("res://scenes/pink_row.tscn"),
+	"yellow": preload("res://scenes/yellow_piece_row.tscn"),
+	"orange": preload("res://scenes/orange_row.tscn"),
+}
+
+var striped_pieces_vertical = {
+	"blue": preload("res://scenes/blue_piece_colum.tscn"),
+	"green": preload("res://scenes/green_piece_column.tscn"),
+	"light_green": preload("res://scenes/light_green_column.tscn"),
+	"pink": preload("res://scenes/pink_column.tscn"),
+	"yellow": preload("res://scenes/yellow_column.tscn"),
+	"orange": preload("res://scenes/orange_column.tscn"),
+}
+
 # current pieces in scene
 var all_pieces = []
 
@@ -36,11 +67,11 @@ var first_touch = Vector2.ZERO
 var final_touch = Vector2.ZERO
 var is_controlling = false
 
-# scoring variables and signals
-
-
-# counter variables and signals
-
+func _process(delta):
+	if state == MOVE:
+		touch_input()
+	elif state == TIME:
+		update_time(delta)
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -48,6 +79,36 @@ func _ready():
 	randomize()
 	all_pieces = make_2d_array()
 	spawn_pieces()
+	setup_level()
+
+func setup_level():
+	if state == TIME:
+		transition_to_time_mode()
+	else:
+		transition_to_moves_mode()
+
+func end_level():
+	game_timer.stop()  
+	setup_level()
+
+#esto no sirve
+func transition_to_time_mode():
+	state = TIME
+	remaining_time = time_limit
+	game_timer.start()  
+
+func update_time(delta):
+	remaining_time -= delta
+	if remaining_time <= 0:
+		remaining_time = 0
+		game_over()   
+
+#Esto funciona
+func transition_to_moves_mode():
+	state = MOVE
+	start_moves_mode()  
+	game_timer.stop()  
+	
 
 func make_2d_array():
 	var array = []
@@ -120,16 +181,21 @@ func swap_pieces(column, row, direction: Vector2):
 	if first_piece == null or other_piece == null:
 		return
 	# swap
-	state = WAIT
-	store_info(first_piece, other_piece, Vector2(column, row), direction)
-	all_pieces[column][row] = other_piece
-	all_pieces[column + direction.x][row + direction.y] = first_piece
-	#first_piece.position = grid_to_pixel(column + direction.x, row + direction.y)
-	#other_piece.position = grid_to_pixel(column, row)
-	first_piece.move(grid_to_pixel(column + direction.x, row + direction.y))
-	other_piece.move(grid_to_pixel(column, row))
-	if not move_checked:
-		find_matches()
+	if current_count > 0:
+		state = WAIT
+		store_info(first_piece, other_piece, Vector2(column, row), direction)
+		all_pieces[column][row] = other_piece
+		all_pieces[column + direction.x][row + direction.y] = first_piece
+		#first_piece.position = grid_to_pixel(column + direction.x, row + direction.y)
+		#other_piece.position = grid_to_pixel(column, row)
+		first_piece.move(grid_to_pixel(column + direction.x, row + direction.y))
+		other_piece.move(grid_to_pixel(column, row))
+		if not move_checked:
+			find_matches()
+			
+		decrement_moves()
+	else :
+		game_over()
 
 func store_info(first_piece, other_piece, place, direction):
 	piece_one = first_piece
@@ -157,15 +223,41 @@ func touch_difference(grid_1, grid_2):
 		elif difference.y < 0:
 			swap_pieces(grid_1.x, grid_1.y, Vector2(0, -1))
 
-func _process(delta):
-	if state == MOVE:
-		touch_input()
-
 func find_matches():
 	for i in width:
 		for j in height:
 			if all_pieces[i][j] != null:
 				var current_color = all_pieces[i][j].color
+				# detectar 4 piezas juntas horizontalmente
+				#if (
+					#i > 0 and i < width - 3 
+					#and 
+					#all_pieces[i - 1][j] != null and all_pieces[i + 1][j] != null and all_pieces[i + 2][j] != null and all_pieces[i + 3][j] != null
+					#and 
+					#all_pieces[i - 1][j].color == current_color and all_pieces[i + 1][j].color == current_color and all_pieces[i + 2][j].color == current_color and all_pieces[i + 3][j].color == current_color
+				#):
+					## Crear pieza especial horizontal
+					#create_special_piece(i, j, current_color, true)
+					#all_pieces[i - 1][j].matched = true
+					#all_pieces[i + 1][j].matched = true
+					#all_pieces[i + 2][j].matched = true
+					#all_pieces[i + 3][j].matched = true
+					#all_pieces[i][j].matched = true
+				## detectar 4 piezas juntas verticalmente
+				#if (
+					#j > 0 and j < height - 3 
+					#and 
+					#all_pieces[i][j - 1] != null and all_pieces[i][j + 1] != null and all_pieces[i][j + 2] != null and all_pieces[i][j + 3] != null
+					#and 
+					#all_pieces[i][j - 1].color == current_color and all_pieces[i][j + 1].color == current_color and all_pieces[i][j + 2].color == current_color and all_pieces[i][j + 3].color == current_color
+				#):
+					## Crear pieza especial vertical
+					#create_special_piece(i, j, current_color, false)
+					#all_pieces[i][j - 1].matched = true
+					#all_pieces[i][j + 1].matched = true
+					#all_pieces[i][j + 2].matched = true
+					#all_pieces[i][j + 3].matched = true
+					#all_pieces[i][j].matched = true
 				# detect horizontal matches
 				if (
 					i > 0 and i < width -1 
@@ -196,21 +288,61 @@ func find_matches():
 					all_pieces[i][j + 1].dim()
 					
 	get_parent().get_node("destroy_timer").start()
+
+func create_special_piece(column, row, color, is_horizontal):
+	var special_piece_scene = null
 	
+	print("Color recibido: ", color)
+	
+	if is_horizontal:
+		special_piece_scene = striped_pieces_horizontal.get(color, null)
+	else:
+		special_piece_scene = striped_pieces_vertical.get(color, null)
+
+	if special_piece_scene == null:
+		print("No se encontró una pieza especial para el color: ", color)
+		return
+	
+	var special_piece = special_piece_scene.instantiate()
+	if special_piece == null:
+		print("Error al instanciar la pieza especial para el color: ", color)
+		return
+	
+	print("Pieza especial creada para el color: ", color)
+	
+	add_child(special_piece)
+	special_piece.position = grid_to_pixel(column, row)
+	
+	# Verificar si se agregó a la escena correctamente
+	if is_instance_valid(special_piece):
+		print("Pieza especial añadida correctamente en la posición: ", column, row)
+	else:
+		print("Error al añadir la pieza especial al árbol de nodos.")
+	
+	# Actualizar la matriz de piezas
+	all_pieces[column][row] = special_piece
+
 func destroy_matched():
 	var was_matched = false
+	var points= 0
 	for i in width:
 		for j in height:
 			if all_pieces[i][j] != null and all_pieces[i][j].matched:
 				was_matched = true
+				points += 5
 				all_pieces[i][j].queue_free()
 				all_pieces[i][j] = null
 				
 	move_checked = true
 	if was_matched:
+		update_score(points)
 		get_parent().get_node("collapse_timer").start()
 	else:
 		swap_back()
+
+func update_score(points):
+	current_score += points
+	top_ui.score_label.text = str(current_score)
 
 func collapse_columns():
 	for i in width:
@@ -261,17 +393,35 @@ func check_after_refill():
 	
 	move_checked = false
 
-func _on_destroy_timer_timeout():
-	print("destroy")
-	destroy_matched()
+func start_moves_mode():
+	current_count = 10
+	top_ui.counter_label.text = str(current_count)
+	state = MOVE  
+
+func decrement_moves():
+	current_count -= 1
+	top_ui.counter_label.text = str(current_count) 
+	if current_count <= 0:
+		game_over()
+		
+func game_over():
+	state = WAIT
+	if is_time_mode:
+		print("Time's up! Game over")
+	else:
+		print("No moves left. Game over")
 
 func _on_collapse_timer_timeout():
 	print("collapse")
 	collapse_columns()
 
-func _on_refill_timer_timeout():
+func _on_refill_timer_timeout() -> void:
 	refill_columns()
-	
-func game_over():
-	state = WAIT
-	print("game over")
+
+func _on_destroy_timer_timeout() -> void:
+	print("destroy")
+	destroy_matched()
+
+func _on_game_timer_timeout() -> void:
+	if is_time_mode:
+		end_level()

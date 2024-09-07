@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://ctjlk2cpea0iu"]
+
+[ext_resource type="Texture2D" uid="uid://dhru1m302wiug" path="res://assets/pieces/Blue Row.png" id="1_o6xq6"]
+
+[node name="BluePieceRow" type="Node2D"]
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_o6xq6")

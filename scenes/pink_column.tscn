@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://dq41i8vjrw3av"]
+
+[ext_resource type="Texture2D" uid="uid://o60ibguctnm4" path="res://assets/pieces/Pink Column.png" id="1_msj7k"]
+
+[node name="PinkColumn" type="Node2D"]
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_msj7k")

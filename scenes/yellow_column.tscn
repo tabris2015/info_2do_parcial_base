@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://clgtdms6ewbq8"]
+
+[ext_resource type="Texture2D" uid="uid://y438i6ufrn27" path="res://assets/pieces/Yellow Column.png" id="1_aqbvh"]
+
+[node name="YellowColumn" type="Node2D"]
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_aqbvh")
