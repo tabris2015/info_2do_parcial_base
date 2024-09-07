@@ -34,6 +34,8 @@ var possible_pieces = [
 	preload("res://scenes/orange_piece.tscn"),
 ]
 
+var rainbow = preload("res://scenes/rainbow.tscn")
+
 var striped_pieces_horizontal = {
 	"blue": preload("res://scenes/blue_piece_row.tscn"),
 	"green": preload("res://scenes/green_piece_row.tscn"),
@@ -226,9 +228,32 @@ func find_matches():
 		for j in height:
 			if all_pieces[i][j] != null:
 				var current_color = all_pieces[i][j].color
-				# detectar 4 piezas juntas horizontalmente
 				if (
-					i <= width - 4 # Asegúrate de que hay suficiente espacio para comparar 4 piezas
+					i <= width - 5 
+					and 
+					all_pieces[i + 1] != null and all_pieces[i + 2] != null 
+					and all_pieces[i + 3] != null and all_pieces[i + 4] != null
+					and 
+					all_pieces[i + 1][j] != null and all_pieces[i + 2][j] != null 
+					and all_pieces[i + 3][j] != null and all_pieces[i + 4][j] != null
+					and 
+					all_pieces[i + 1][j].color == current_color and all_pieces[i + 2][j].color == current_color and all_pieces[i + 3][j].color == current_color and all_pieces[i + 4][j].color == current_color
+				):
+					create_special_piece(i, j, current_color, true, true)
+					
+				
+				if (
+					j <= height - 5
+					and 
+					all_pieces[i][j + 1] != null and all_pieces[i][j + 2] != null
+					and all_pieces[i][j + 3] != null and all_pieces[i][j + 4] != null
+					and 
+					all_pieces[i][j + 1].color == current_color and all_pieces[i][j + 2].color == current_color 
+					and all_pieces[i][j + 3].color == current_color and all_pieces[i][j + 4].color == current_color
+				):
+					create_special_piece(i, j, current_color, false, true)
+				if (
+					i <= width - 4 
 					and 
 					all_pieces[i + 1] != null and all_pieces[i + 2] != null and all_pieces[i + 3] != null
 					and 
@@ -236,18 +261,14 @@ func find_matches():
 					and 
 					all_pieces[i + 1][j].color == current_color and all_pieces[i + 2][j].color == current_color and all_pieces[i + 3][j].color == current_color
 				):
-					print("4 piezas horizontales encontradas en", i, j)
-					#print("El color de la pieza es: ", current_color)
 					create_special_piece(i, j, current_color, true)
 				if (
-					j <= height - 4 # Asegúrate de que hay suficiente espacio para comparar 4 piezas
+					j <= height - 4 
 					and 
 					all_pieces[i][j + 1] != null and all_pieces[i][j + 2] != null and all_pieces[i][j + 3] != null
 					and 
 					all_pieces[i][j + 1].color == current_color and all_pieces[i][j + 2].color == current_color and all_pieces[i][j + 3].color == current_color
 				):
-					print("4 piezas verticales encontradas en", i, j)
-					#print("El color de la pieza es: ", current_color)
 					create_special_piece(i, j, current_color, false)
 				 #detect horizontal matches
 				if (
@@ -280,28 +301,27 @@ func find_matches():
 					
 	get_parent().get_node("destroy_timer").start()
 
-func create_special_piece(column, row, color, is_horizontal):
+	
+func create_special_piece(column, row, color, is_horizontal, is_rainbow := false):
 	var special_piece_scene = null
-	print("Color recibido: ", color)
-	if is_horizontal:
-		special_piece_scene = striped_pieces_vertical.get(color, null)
+	if is_rainbow:
+		special_piece_scene = rainbow
+		update_score(15)
 	else:
-		special_piece_scene = striped_pieces_horizontal.get(color, null)
+		if is_horizontal:
+			special_piece_scene = striped_pieces_horizontal.get(color, null)
+		else:
+			special_piece_scene = striped_pieces_vertical.get(color, null)
+		update_score(10)
 	if special_piece_scene == null:
-		print("No se encontró una pieza especial para el color: ", color)
 		return
 	var special_piece = special_piece_scene.instantiate()
 	if special_piece == null:
-		print("Error al instanciar la pieza especial para el color: ", color)
 		return
-	print("Pieza especial creada para el color: ", color)
 	add_child(special_piece)
 	special_piece.position = grid_to_pixel(column, row)
-	if is_instance_valid(special_piece):
-		print("Pieza especial añadida correctamente en la posición: ", column, row)
-	else:
-		print("Error al añadir la pieza especial al árbol de nodos.")
 	all_pieces[column][row] = special_piece
+	
 
 func destroy_matched():
 	var was_matched = false
@@ -323,6 +343,9 @@ func destroy_matched():
 func update_score(points):
 	current_score += points
 	top_ui.score_label.text = str(current_score)
+	if current_score == 10:
+		state = WAIT
+		print("You won!")
 
 func collapse_columns():
 	for i in width:

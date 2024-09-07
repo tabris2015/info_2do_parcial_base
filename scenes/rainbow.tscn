@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://dh38tuqexyitc"]
+
+[ext_resource type="PackedScene" uid="uid://dimhfx4c1igfv" path="res://scenes/piece.tscn" id="1_07swo"]
+[ext_resource type="Texture2D" uid="uid://d1ucglmj14llv" path="res://assets/pieces/Rainbow.png" id="2_xlnlf"]
+
+[node name="Rainbow" instance=ExtResource("1_07swo")]
+color = "blue"
+
+[node name="Sprite2D" parent="." index="0"]
+texture = ExtResource("2_xlnlf")
