@@ -240,9 +240,15 @@ func find_matches():
 					all_pieces[i + 1][j].color == current_color and all_pieces[i + 2][j].color == current_color and all_pieces[i + 3][j].color == current_color and all_pieces[i + 4][j].color == current_color
 				):
 					create_special_piece(i, j, current_color, true, true)
-					
-				
-				if (
+					all_pieces[i + 1][j].matched = true
+					all_pieces[i + 1][j].dim()
+					all_pieces[i + 2][j].matched = true
+					all_pieces[i + 2][j].dim()
+					all_pieces[i + 3][j].matched = true
+					all_pieces[i + 3][j].dim()
+					all_pieces[i + 4][j].matched = true
+					all_pieces[i + 4][j].dim()
+				elif (
 					j <= height - 5
 					and 
 					all_pieces[i][j + 1] != null and all_pieces[i][j + 2] != null
@@ -252,7 +258,15 @@ func find_matches():
 					and all_pieces[i][j + 3].color == current_color and all_pieces[i][j + 4].color == current_color
 				):
 					create_special_piece(i, j, current_color, false, true)
-				if (
+					all_pieces[i][j + 1].matched = true
+					all_pieces[i][j + 1].dim()
+					all_pieces[i][j + 2].matched = true
+					all_pieces[i][j + 2].dim()
+					all_pieces[i][j + 3].matched = true
+					all_pieces[i][j + 3].dim()
+					all_pieces[i][j + 4].matched = true
+					all_pieces[i][j + 4].dim()
+				elif (
 					i <= width - 4 
 					and 
 					all_pieces[i + 1] != null and all_pieces[i + 2] != null and all_pieces[i + 3] != null
@@ -262,7 +276,13 @@ func find_matches():
 					all_pieces[i + 1][j].color == current_color and all_pieces[i + 2][j].color == current_color and all_pieces[i + 3][j].color == current_color
 				):
 					create_special_piece(i, j, current_color, true)
-				if (
+					all_pieces[i + 1][j].matched = true
+					all_pieces[i + 1][j].dim()
+					all_pieces[i + 2][j].matched = true
+					all_pieces[i + 2][j].dim()
+					all_pieces[i + 3][j].matched = true
+					all_pieces[i + 3][j].dim()
+				elif (
 					j <= height - 4 
 					and 
 					all_pieces[i][j + 1] != null and all_pieces[i][j + 2] != null and all_pieces[i][j + 3] != null
@@ -270,8 +290,14 @@ func find_matches():
 					all_pieces[i][j + 1].color == current_color and all_pieces[i][j + 2].color == current_color and all_pieces[i][j + 3].color == current_color
 				):
 					create_special_piece(i, j, current_color, false)
-				 #detect horizontal matches
-				if (
+					all_pieces[i][j + 1].matched = true
+					all_pieces[i][j + 1].dim()
+					all_pieces[i][j + 2].matched = true
+					all_pieces[i][j + 2].dim()
+					all_pieces[i][j + 3].matched = true
+					all_pieces[i][j + 3].dim()
+				#detect horizontal matches
+				elif (
 					i > 0 and i < width -1 
 					and 
 					all_pieces[i - 1][j] != null and all_pieces[i + 1][j]
@@ -285,7 +311,7 @@ func find_matches():
 					all_pieces[i + 1][j].matched = true
 					all_pieces[i + 1][j].dim()
 				# detect vertical matches
-				if (
+				elif (
 					j > 0 and j < height -1 
 					and 
 					all_pieces[i][j - 1] != null and all_pieces[i][j + 1]
@@ -301,7 +327,6 @@ func find_matches():
 					
 	get_parent().get_node("destroy_timer").start()
 
-	
 func create_special_piece(column, row, color, is_horizontal, is_rainbow := false):
 	var special_piece_scene = null
 	if is_rainbow:
@@ -309,9 +334,9 @@ func create_special_piece(column, row, color, is_horizontal, is_rainbow := false
 		update_score(15)
 	else:
 		if is_horizontal:
-			special_piece_scene = striped_pieces_horizontal.get(color, null)
-		else:
 			special_piece_scene = striped_pieces_vertical.get(color, null)
+		else:
+			special_piece_scene = striped_pieces_horizontal.get(color, null)
 		update_score(10)
 	if special_piece_scene == null:
 		return
@@ -320,22 +345,22 @@ func create_special_piece(column, row, color, is_horizontal, is_rainbow := false
 		return
 	add_child(special_piece)
 	special_piece.position = grid_to_pixel(column, row)
+	special_piece.is_special_piece = true
 	all_pieces[column][row] = special_piece
-	
 
 func destroy_matched():
 	var was_matched = false
-	var points= 0
 	for i in width:
 		for j in height:
 			if all_pieces[i][j] != null and all_pieces[i][j].matched:
-				was_matched = true
-				all_pieces[i][j].queue_free()
-				all_pieces[i][j] = null
-	points += 5
+				if not all_pieces[i][j].is_special_piece:
+					was_matched = true
+					all_pieces[i][j].queue_free()
+					all_pieces[i][j] = null
+
 	move_checked = true
 	if was_matched:
-		update_score(points)
+		update_score(5)
 		get_parent().get_node("collapse_timer").start()
 	else:
 		swap_back()
@@ -362,7 +387,6 @@ func collapse_columns():
 	get_parent().get_node("refill_timer").start()
 
 func refill_columns():
-	
 	for i in width:
 		for j in height:
 			if all_pieces[i][j] == null:
@@ -382,7 +406,6 @@ func refill_columns():
 				piece.move(grid_to_pixel(i, j))
 				# fill array with pieces
 				all_pieces[i][j] = piece
-				
 	check_after_refill()
 
 func check_after_refill():
@@ -413,6 +436,7 @@ func game_over():
 		print("Time's up! Game over")
 	else:
 		print("No moves left. Game over")
+
 
 func _on_collapse_timer_timeout():
 	print("collapse")

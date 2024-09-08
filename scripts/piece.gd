@@ -2,6 +2,8 @@ extends Node2D
 
 @export var color: String
 
+var is_special_piece: bool = false
+
 var matched = false
 
 func move(target):
