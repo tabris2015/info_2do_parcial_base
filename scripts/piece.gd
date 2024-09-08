@@ -3,7 +3,8 @@ extends Node2D
 @export var color: String
 
 var is_special_piece: bool = false
-
+var is_horizontal: bool = false
+var is_rainbow:bool = false
 var matched = false
 
 func move(target):
@@ -14,3 +15,9 @@ func move(target):
 
 func dim():
 	$Sprite2D.modulate = Color(1, 1, 1, 0.5)
+
+func set_horizontal(value):
+	is_horizontal = value
+
+func set_rainbow(value):
+	is_rainbow = value
