@@ -1,11 +1,11 @@
 [gd_scene load_steps=4 format=3 uid="uid://40rficrjq2dd"]
 
 [ext_resource type="PackedScene" uid="uid://dm0s7gtfwguog" path="res://scenes/yellow_piece.tscn" id="1_dsau0"]
-[ext_resource type="Script" path="res://scripts/color_piece.gd" id="2_7hnt7"]
+[ext_resource type="Script" path="res://scripts/star_piece.gd" id="2_14hdv"]
 [ext_resource type="Texture2D" uid="uid://c4g6jq81jnxs2" path="res://assets/pieces/Yellow Adjacent.png" id="3_3an81"]
 
 [node name="YellowPiece" instance=ExtResource("1_dsau0")]
-script = ExtResource("2_7hnt7")
+script = ExtResource("2_14hdv")
 
 [node name="Sprite2D" parent="." index="0"]
 texture = ExtResource("3_3an81")

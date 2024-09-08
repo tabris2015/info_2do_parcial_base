@@ -1,11 +1,11 @@
 [gd_scene load_steps=4 format=3 uid="uid://b4nrbfujyuxdn"]
 
 [ext_resource type="PackedScene" uid="uid://5nta7o8y3bto" path="res://scenes/green_piece.tscn" id="1_sts82"]
-[ext_resource type="Script" path="res://scripts/color_piece.gd" id="2_2tcfe"]
+[ext_resource type="Script" path="res://scripts/star_piece.gd" id="2_4183m"]
 [ext_resource type="Texture2D" uid="uid://c5c0a1mipiltf" path="res://assets/pieces/Green Adjacent.png" id="3_hpm2e"]
 
 [node name="GreenPiece" instance=ExtResource("1_sts82")]
-script = ExtResource("2_2tcfe")
+script = ExtResource("2_4183m")
 
 [node name="Sprite2D" parent="." index="0"]
 texture = ExtResource("3_hpm2e")
