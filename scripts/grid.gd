@@ -93,7 +93,6 @@ func end_level():
 	game_timer.stop()  
 	setup_level()
 
-#esto no sirve
 func transition_to_time_mode():
 	state = TIME
 	remaining_time = time_limit
@@ -106,7 +105,6 @@ func update_time(delta):
 		remaining_time = 0
 		game_over()   
 
-#Esto funciona
 func transition_to_moves_mode():
 	state = MOVE
 	start_moves_mode()  
@@ -188,10 +186,10 @@ func swap_pieces(column, row, direction: Vector2):
 		store_info(first_piece, other_piece, Vector2(column, row), direction)
 		all_pieces[column][row] = other_piece
 		all_pieces[column + direction.x][row + direction.y] = first_piece
-		#first_piece.position = grid_to_pixel(column + direction.x, row + direction.y)
-		#other_piece.position = grid_to_pixel(column, row)
-		first_piece.move(grid_to_pixel(column + direction.x, row + direction.y))
-		other_piece.move(grid_to_pixel(column, row))
+		first_piece.position = grid_to_pixel(column + direction.x, row + direction.y)
+		other_piece.position = grid_to_pixel(column, row)
+		#first_piece.move(grid_to_pixel(column + direction.x, row + direction.y))
+		#other_piece.move(grid_to_pixel(column, row))
 		if not move_checked:
 			find_matches()
 			decrement_moves()
@@ -269,7 +267,6 @@ func find_matches():
 						all_pieces[i - 1][j].dim()
 						all_pieces[i - 2][j].matched = true
 						all_pieces[i - 2][j].dim()
-
 				elif i <= width - 3 and j >= 2 and all_pieces[i][j].color == current_color:
 					if (
 						all_pieces[i + 1][j] != null and all_pieces[i + 2][j] != null and
@@ -419,8 +416,6 @@ func create_special_piece(column, row, color, is_horizontal, is_rainbow := false
 		return
 	if special_piece.has_method("set_horizontal"):
 		special_piece.call("set_horizontal", is_horizontal)
-	if special_piece.has_method("set_horizontal"):
-		special_piece.call("set_horizontal", is_horizontal)
 	get_parent().add_child(special_piece)
 	all_pieces[column][row].queue_free()
 	special_piece.position = grid_to_pixel(column, row)
@@ -434,9 +429,9 @@ func destroy_matched():
 			if all_pieces[i][j] != null and all_pieces[i][j].matched:
 				if all_pieces[i][j].is_special_piece:
 					if all_pieces[i][j].is_horizontal:
-						destroy_row(i, j)
-					else:
 						destroy_column(i, j) 
+					else:
+						destroy_row(i, j)
 					was_matched = true
 				elif not all_pieces[i][j].is_special_piece:
 					was_matched = true
