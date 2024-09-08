@@ -66,9 +66,25 @@ var is_controlling = false
 
 # scoring variables and signals
 var score = 0
+var final_score = 0
 signal score_changed(new_score)
 
 # counter variables and signals
+var moves_left = 10
+signal moves_changed(new_moves)
+
+# levels variables and signal to change levels
+var current_level = 1
+var target_score = 10 
+var level_time = 10  
+var time_remaining = level_time
+var time_passed = 0
+signal level_changed(new_level)
+signal time_remaining_changed(new_time)
+signal game_over_signal()
+signal current_level_signal()
+	
+#Called when the node enters the scene tree for the first time.
 var minus_moves = 1
 signal moves_left_changed(new_moves)
 
@@ -85,7 +101,30 @@ func _ready():
 	all_pieces = make_2d_array()
 	just_moved = make_2d_array()
 	spawn_pieces()
+	emit_signal("moves_changed", moves_left)
+	start_level_timer()
+	call_deferred("emit_signal", "current_level_signal", current_level)
+	
+	
+func _process(delta):
+	if state == MOVE:
+		touch_input()
+	
+	# Update the timer
+	time_passed += delta
+	if time_passed >= 1:
+		time_remaining -= 1
+		emit_signal("time_remaining_changed", time_remaining)
+		time_passed = 0
 
+		if time_remaining <= 0:
+			check_end_of_level()
+			
+func start_level_timer():
+	var timer_label = get_parent().get_node("top_ui/MarginContainer/HBoxContainer/timer_label")
+	if timer_label:
+		timer_label.text = str(time_remaining) 
+	
 func make_2d_array():
 	var array = []
 	for i in width:
@@ -171,8 +210,10 @@ func swap_pieces(column, row, direction: Vector2):
 		just_moved[column + direction.x][row + direction.y] = true
 		var isFind = find_matches()
 		if isFind:
-			# Restar una jugada
-			emit_signal("moves_left_changed", minus_moves)
+			moves_left -= 1
+			emit_signal("moves_changed", moves_left)
+			check_end_of_level()
+			
 
 func store_info(first_piece, other_piece, place, direction):
 	piece_one = first_piece
@@ -207,9 +248,9 @@ func touch_difference(grid_1, grid_2):
 		elif difference.y < 0:
 			swap_pieces(grid_1.x, grid_1.y, Vector2(0, -1))
 
-func _process(delta):
-	if state == MOVE:
-		touch_input()
+#func _process(delta):
+	#if state == MOVE:
+		#touch_input()
 
 func find_matches():
 	groups = []
@@ -258,6 +299,7 @@ func find_matches():
 					all_pieces[i + 1][j].matched = true
 					all_pieces[i + 1][j].dim()
 					score += 30 
+					final_score += 30
 					emit_signal("score_changed", score)
 					matches_found = true
 				# detect vertical matches
@@ -299,6 +341,7 @@ func find_matches():
 					all_pieces[i][j + 1].matched = true
 					all_pieces[i][j + 1].dim()
 					score += 30 
+					final_score += 30
 					emit_signal("score_changed", score)
 					matches_found = true
 					
@@ -424,6 +467,53 @@ func _on_collapse_timer_timeout():
 func _on_refill_timer_timeout():
 	refill_columns()
 	
+#func _on_level_timer_timeout():
+	#time_remaining -= 1
+	#emit_signal("time_remaining_changed", time_remaining)
+	#if time_remaining <= 0:
+		#check_end_of_level()
+		
+func check_end_of_level():
+	if score >= target_score and (moves_left <= 0 or time_remaining <= 0):
+		advance_to_next_level()
+	elif moves_left <= 0 or time_remaining <= 0:
+		game_over()
+		
+func advance_to_next_level():
+	current_level += 1
+	target_score += 100
+	level_time += 10  
+	emit_signal("level_changed", current_level) 
+	reset_level()
+	
+func reset_level():
+	score = 0
+	time_remaining = level_time
+	reset_moves()
+	emit_signal("score_changed", score)
+	emit_signal("time_remaining_changed", time_remaining)
+	emit_signal("current_level_signal", current_level)
+	reset_moves()
+	reset_board()
+	start_level_timer()
+	
+func reset_board():
+	for i in width:
+		for j in height:
+			if all_pieces[i][j] != null:
+				all_pieces[i][j].queue_free()
+				all_pieces[i][j] = null
+	# Generate new pieces
+	spawn_pieces()
+	
+func reset_moves():
+	moves_left = 10 + 2 * (current_level - 1)
+	emit_signal("moves_changed", moves_left)
+	
 func game_over():
 	state = WAIT
 	print("game over")
+	get_tree().paused = true
+	
+	#Final score and current levell
+	emit_signal("game_over_signal", final_score, current_level)
