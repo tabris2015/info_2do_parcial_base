@@ -92,7 +92,8 @@ signal moves_left_changed(new_moves)
 var just_moved = []
 var groups = []
 
-
+#Freezing probability %
+var freeze_probability = 10
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -154,6 +155,11 @@ func spawn_pieces():
 			var rand = randi_range(0, possible_pieces.size() - 1)
 			# instance 
 			var piece = possible_pieces[rand].instantiate()
+			
+			var should_freeze = randi_range(0, 100) < freeze_probability
+			if should_freeze:
+				piece.freeze(randi_range(2, 3))
+				
 			# repeat until no matches
 			var max_loops = 100
 			var loops = 0
@@ -196,6 +202,9 @@ func swap_pieces(column, row, direction: Vector2):
 	var other_piece = all_pieces[column + direction.x][row + direction.y]
 	if first_piece == null or other_piece == null:
 		return
+	if first_piece.is_frozen() or other_piece.is_frozen():
+		print("No se puede mover una ficha congelada!")
+		return
 	# swap
 	state = WAIT
 	store_info(first_piece, other_piece, Vector2(column, row), direction)
@@ -222,6 +231,7 @@ func swap_pieces(column, row, direction: Vector2):
 		if isFind:
 			moves_left -= 1
 			emit_signal("moves_changed", moves_left)
+			decrement_frozen_turns()
 			check_end_of_level()
 			
 
@@ -268,7 +278,7 @@ func find_matches():
 	var matches_found = false
 	for i in width:
 		for j in height:
-			if all_pieces[i][j] != null:
+			if all_pieces[i][j] != null and not all_pieces[i][j].frozen:
 				var current_color = all_pieces[i][j].color
 				# detect horizontal matches
 				if (
@@ -445,6 +455,10 @@ func refill_columns():
 				var rand = randi_range(0, possible_pieces.size() - 1)
 				# instance 
 				var piece = possible_pieces[rand].instantiate()
+				
+				var should_freeze = randi_range(0, 100) < freeze_probability
+				if should_freeze:
+					piece.freeze(randi_range(2, 3))
 				# repeat until no matches
 				var max_loops = 100
 				var loops = 0
@@ -467,10 +481,17 @@ func check_after_refill():
 				find_matches()
 				get_parent().get_node("destroy_timer").start()
 				return
+	#decrement_frozen_turns()
 	state = MOVE
 	
 	move_checked = false
-
+	
+func decrement_frozen_turns():
+	for i in width:
+		for j in height:
+			if all_pieces[i][j] != null:
+				all_pieces[i][j].decrement_frozen_turn()
+				
 func _on_destroy_timer_timeout():
 	print("destroy")
 	destroy_matched()
