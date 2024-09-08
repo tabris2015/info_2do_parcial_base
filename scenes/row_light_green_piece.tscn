@@ -1,0 +1,11 @@
+[gd_scene load_steps=4 format=3 uid="uid://2kmrmrcktbji"]
+
+[ext_resource type="PackedScene" uid="uid://b83v444nmsr7j" path="res://scenes/light_green_piece.tscn" id="1_ko51e"]
+[ext_resource type="Script" path="res://scripts/row_piece.gd" id="2_aj84l"]
+[ext_resource type="Texture2D" uid="uid://bb0xx0yg2qgom" path="res://assets/pieces/Light Green Row.png" id="3_4ocxu"]
+
+[node name="LightGreenPiece" instance=ExtResource("1_ko51e")]
+script = ExtResource("2_aj84l")
+
+[node name="Sprite2D" parent="." index="0"]
+texture = ExtResource("3_4ocxu")

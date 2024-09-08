@@ -1,4 +1,5 @@
 extends Node2D
+class_name Piece
 
 @export var color: String
 
@@ -12,3 +13,6 @@ func move(target):
 
 func dim():
 	$Sprite2D.modulate = Color(1, 1, 1, 0.5)
+	
+func special(postion, all_pieces):
+	pass

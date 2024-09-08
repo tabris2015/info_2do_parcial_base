@@ -1,0 +1,11 @@
+[gd_scene load_steps=4 format=3 uid="uid://dw6mxbpdr6wap"]
+
+[ext_resource type="PackedScene" uid="uid://btb17hb0myj2x" path="res://scenes/blue_piece.tscn" id="1_1frhy"]
+[ext_resource type="Script" path="res://scripts/row_piece.gd" id="2_dtqf6"]
+[ext_resource type="Texture2D" uid="uid://dhru1m302wiug" path="res://assets/pieces/Blue Row.png" id="3_f68ap"]
+
+[node name="BluePiece" instance=ExtResource("1_1frhy")]
+script = ExtResource("2_dtqf6")
+
+[node name="Sprite2D" parent="." index="0"]
+texture = ExtResource("3_f68ap")

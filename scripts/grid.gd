@@ -4,6 +4,8 @@ extends Node2D
 enum {WAIT, MOVE}
 var state
 
+enum {HORIZONTAL, VERTICAL}
+
 # grid
 @export var width: int
 @export var height: int
@@ -21,6 +23,32 @@ var possible_pieces = [
 	preload("res://scenes/yellow_piece.tscn"),
 	preload("res://scenes/orange_piece.tscn"),
 ]
+var column_pieces = {
+	"blue": preload("res://scenes/column_blue_piece.tscn"),
+	"green": preload("res://scenes/column_green_piece.tscn"),
+	"light_green": preload("res://scenes/column_light_green_piece.tscn"),
+	"pink": preload("res://scenes/column_pink_piece.tscn"),
+	"yellow": preload("res://scenes/column_yellow_piece.tscn"),
+	"orange": preload("res://scenes/column_orange_piece.tscn")
+}
+
+var row_pieces = {
+	"blue": preload("res://scenes/row_blue_piece.tscn"),
+	"green": preload("res://scenes/row_green_piece.tscn"),
+	"light_green": preload("res://scenes/row_light_green_piece.tscn"),
+	"pink": preload("res://scenes/row_pink_piece.tscn"),
+	"yellow": preload("res://scenes/row_yellow_piece.tscn"),
+	"orange": preload("res://scenes/row_orange_piece.tscn")
+}
+
+var color_piece = {
+	"blue": preload("res://scenes/color_blue_piece.tscn"),
+	"green": preload("res://scenes/color_green_piece.tscn"),
+	"light_green": preload("res://scenes/color_light_green_piece.tscn"),
+	"pink": preload("res://scenes/color_pink_piece.tscn"),
+	"yellow": preload("res://scenes/color_yellow_piece.tscn"),
+	"orange": preload("res://scenes/color_orange_piece.tscn")	
+}
 # current pieces in scene
 var all_pieces = []
 
@@ -44,6 +72,9 @@ signal score_changed(new_score)
 var minus_moves = 1
 signal moves_left_changed(new_moves)
 
+var just_moved = []
+var groups = []
+
 
 
 # Called when the node enters the scene tree for the first time.
@@ -52,6 +83,7 @@ func _ready():
 	state = MOVE
 	randomize()
 	all_pieces = make_2d_array()
+	just_moved = make_2d_array()
 	spawn_pieces()
 
 func make_2d_array():
@@ -135,6 +167,8 @@ func swap_pieces(column, row, direction: Vector2):
 	other_piece.move(grid_to_pixel(column, row))
 	
 	if not move_checked:
+		just_moved[column][row] = true
+		just_moved[column + direction.x][row + direction.y] = true
 		var isFind = find_matches()
 		if isFind:
 			# Restar una jugada
@@ -152,8 +186,15 @@ func swap_back():
 	state = MOVE
 	move_checked = false
 
+func init_just_moved():
+	for i in width:
+		for j in height:
+			just_moved[i][j] = false
+
 func touch_difference(grid_1, grid_2):
 	var difference = grid_2 - grid_1
+	
+	init_just_moved()
 	# should move x or y?
 	if abs(difference.x) > abs(difference.y):
 		if difference.x > 0:
@@ -171,6 +212,8 @@ func _process(delta):
 		touch_input()
 
 func find_matches():
+	groups = []
+	var idGroup = make_2d_array()
 	var matches_found = false
 	for i in width:
 		for j in height:
@@ -184,6 +227,30 @@ func find_matches():
 					and 
 					all_pieces[i - 1][j].color == current_color and all_pieces[i + 1][j].color == current_color
 				):
+					var group = null
+					if idGroup[i-1][j] != null:
+						group=idGroup[i-1][j]
+					if idGroup[i][j] != null:
+						group=idGroup[i][j]
+					if idGroup[i+1][j] != null:
+						group=idGroup[i+1][j]	
+					
+					if(group == null):
+						idGroup[i-1][j]=groups.size()
+						idGroup[i][j]=groups.size()
+						idGroup[i+1][j]=groups.size()
+						group = groups.size()
+						groups.append([])
+							
+					groups[group].append([Vector2(i,j), all_pieces[i][j].color, VERTICAL])
+					groups[group].append([Vector2(i+1,j), all_pieces[i+1][j].color, VERTICAL])
+					groups[group].append([Vector2(i-1,j), all_pieces[i-1][j].color, VERTICAL])
+					
+					all_pieces[i][j].special(Vector2(i,j), all_pieces)	
+					all_pieces[i-1][j].special(Vector2(i-1,j), all_pieces)
+					all_pieces[i+1][j].special(Vector2(i+1,j), all_pieces)
+															
+					
 					all_pieces[i - 1][j].matched = true
 					all_pieces[i - 1][j].dim()
 					all_pieces[i][j].matched = true
@@ -201,6 +268,30 @@ func find_matches():
 					and 
 					all_pieces[i][j - 1].color == current_color and all_pieces[i][j + 1].color == current_color
 				):
+					
+					var group = null
+					if idGroup[i][j-1] != null:
+						group=idGroup[i][j-1]
+					if idGroup[i][j] != null:
+						group=idGroup[i][j]
+					if idGroup[i][j+1] != null:
+						group=idGroup[i][j+1]	
+					
+					if(group == null):
+						idGroup[i][j-1]=groups.size()
+						idGroup[i][j]=groups.size()
+						idGroup[i][j+1]=groups.size()
+						group = groups.size()
+						groups.append([])
+							
+					groups[group].append([Vector2(i,j-1), all_pieces[i][j-1].color, HORIZONTAL])
+					groups[group].append([Vector2(i,j), all_pieces[i][j].color, HORIZONTAL])
+					groups[group].append([Vector2(i,j+1), all_pieces[i][j+1].color, HORIZONTAL])
+					
+					all_pieces[i][j].special(Vector2(i,j), all_pieces)
+					all_pieces[i][j+1].special(Vector2(i,j+1), all_pieces)
+					all_pieces[i][j-1].special(Vector2(i,j-1), all_pieces)
+					
 					all_pieces[i][j - 1].matched = true
 					all_pieces[i][j - 1].dim()
 					all_pieces[i][j].matched = true
@@ -212,10 +303,20 @@ func find_matches():
 					matches_found = true
 					
 	get_parent().get_node("destroy_timer").start()
+
 	return matches_found
 	
+		
+func uniqueArray(array):
+	var unique = []
+	for item in array:
+		if not unique.has(item):
+			unique.append(item)
+	return unique
+
 func destroy_matched():
 	var was_matched = false
+	
 	for i in width:
 		for j in height:
 			if all_pieces[i][j] != null and all_pieces[i][j].matched:
@@ -226,21 +327,54 @@ func destroy_matched():
 	move_checked = true
 	if was_matched:
 		get_parent().get_node("collapse_timer").start()
-		
 	else:
 		swap_back()
 
+func create_special(size, position, color, direction):
+	var piece = null
+	if(size == 4):
+		if direction == VERTICAL:
+			piece = row_pieces[color].instantiate()
+		else:
+			piece = column_pieces[color].instantiate()
+	else:
+		piece = color_piece[color].instantiate()
+	
+	add_child(piece)
+	piece.position = grid_to_pixel(position[0], position[1] - y_offset)
+	piece.move(grid_to_pixel(position[0], position[1]))
+	
+	all_pieces[position[0]][position[1]] = piece
+	
+func generate_special():
+	for group in groups:
+		group = uniqueArray(group)
+		if group.size() >= 4:
+			var special
+			for piece in group:
+				var x = piece[0][0]
+				var y = piece[0][1]
+				if just_moved[x][y]:
+					special = piece
+					break
+			create_special(group.size(), special[0], special[1], special[2])
+	groups = []
+
 func collapse_columns():
+	
+	generate_special()
+	
 	for i in width:
 		for j in height:
 			if all_pieces[i][j] == null:
-				print(i, j)
+				print(i, ", ", j)
 				# look above
 				for k in range(j + 1, height):
 					if all_pieces[i][k] != null:
 						all_pieces[i][k].move(grid_to_pixel(i, j))
 						all_pieces[i][j] = all_pieces[i][k]
 						all_pieces[i][k] = null
+						just_moved[i][j] = true
 						break
 	get_parent().get_node("refill_timer").start()
 
