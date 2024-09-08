@@ -12,3 +12,4 @@ func special(position, all_pieces):
 		all_pieces[row][column].dim()
 		all_pieces[row][column].matched = true
 		all_pieces[row][column].special(Vector2(row,column), all_pieces)
+		

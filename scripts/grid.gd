@@ -47,8 +47,9 @@ var color_piece = {
 	"light_green": preload("res://scenes/color_light_green_piece.tscn"),
 	"pink": preload("res://scenes/color_pink_piece.tscn"),
 	"yellow": preload("res://scenes/color_yellow_piece.tscn"),
-	"orange": preload("res://scenes/color_orange_piece.tscn")	
+	"orange": preload("res://scenes/color_orange_piece.tscn"),
 }
+var rainbow_piece = preload("res://scenes/rainbow_piece.tscn")	
 # current pieces in scene
 var all_pieces = []
 
@@ -76,7 +77,7 @@ signal moves_changed(new_moves)
 # levels variables and signal to change levels
 var current_level = 1
 var target_score = 10 
-var level_time = 10  
+var level_time = 30
 var time_remaining = level_time
 var time_passed = 0
 signal level_changed(new_level)
@@ -205,6 +206,15 @@ func swap_pieces(column, row, direction: Vector2):
 	first_piece.move(grid_to_pixel(column + direction.x, row + direction.y))
 	other_piece.move(grid_to_pixel(column, row))
 	
+	if first_piece.color == "multicolor" || other_piece.color == "multicolor":
+		other_piece.special(Vector2(column + direction.x, row + direction.y), all_pieces)		
+		first_piece.special(Vector2(column, row), all_pieces)
+			
+		first_piece.dim()
+		first_piece.matched = true
+		other_piece.dim()
+		other_piece.matched = true
+		
 	if not move_checked:
 		just_moved[column][row] = true
 		just_moved[column + direction.x][row + direction.y] = true
@@ -298,9 +308,7 @@ func find_matches():
 					all_pieces[i][j].dim()
 					all_pieces[i + 1][j].matched = true
 					all_pieces[i + 1][j].dim()
-					score += 30 
-					final_score += 30
-					emit_signal("score_changed", score)
+					
 					matches_found = true
 				# detect vertical matches
 				if (
@@ -340,9 +348,7 @@ func find_matches():
 					all_pieces[i][j].dim()
 					all_pieces[i][j + 1].matched = true
 					all_pieces[i][j + 1].dim()
-					score += 30 
-					final_score += 30
-					emit_signal("score_changed", score)
+					
 					matches_found = true
 					
 	get_parent().get_node("destroy_timer").start()
@@ -360,13 +366,18 @@ func uniqueArray(array):
 func destroy_matched():
 	var was_matched = false
 	
+	var count_matched = 0
 	for i in width:
 		for j in height:
 			if all_pieces[i][j] != null and all_pieces[i][j].matched:
 				was_matched = true
+				count_matched += 1
 				all_pieces[i][j].queue_free()
 				all_pieces[i][j] = null
 				
+	score += count_matched * 10 
+	final_score += count_matched * 10
+	emit_signal("score_changed", score)
 	move_checked = true
 	if was_matched:
 		get_parent().get_node("collapse_timer").start()
@@ -381,7 +392,11 @@ func create_special(size, position, color, direction):
 		else:
 			piece = column_pieces[color].instantiate()
 	else:
-		piece = color_piece[color].instantiate()
+		var rainbow = randi_range(0,1)
+		if rainbow == 1:
+			piece = rainbow_piece.instantiate()
+		else:
+			piece = color_piece[color].instantiate()
 	
 	add_child(piece)
 	piece.position = grid_to_pixel(position[0], position[1] - y_offset)
