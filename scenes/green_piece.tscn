@@ -1,10 +1,21 @@
-[gd_scene load_steps=3 format=3 uid="uid://5nta7o8y3bto"]
+[gd_scene load_steps=6 format=3 uid="uid://5nta7o8y3bto"]
 
 [ext_resource type="PackedScene" uid="uid://dimhfx4c1igfv" path="res://scenes/piece.tscn" id="1_3r645"]
+[ext_resource type="Shader" path="res://shaders/dark.gdshader" id="2_c651a"]
 [ext_resource type="Texture2D" uid="uid://bekfyqfmnd4ku" path="res://assets/pieces/Green Piece.png" id="2_peabb"]
+[ext_resource type="Texture2D" uid="uid://brwnxir7wdq74" path="res://assets/pieces/block_piece.png" id="3_oybjt"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_d6a1q"]
+shader = ExtResource("2_c651a")
+shader_parameter/color_modulate = Vector4(1, 1, 1, 1)
 
 [node name="GreenPiece" instance=ExtResource("1_3r645")]
+material = SubResource("ShaderMaterial_d6a1q")
 color = "green"
 
 [node name="Sprite2D" parent="." index="0"]
 texture = ExtResource("2_peabb")
+
+[node name="Block" type="Sprite2D" parent="." index="1"]
+visible = false
+texture = ExtResource("3_oybjt")

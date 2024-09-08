@@ -94,6 +94,7 @@ var groups = []
 
 #Freezing probability %
 var freeze_probability = 10
+var harden_probability = 10
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -159,6 +160,10 @@ func spawn_pieces():
 			var should_freeze = randi_range(0, 100) < freeze_probability
 			if should_freeze:
 				piece.freeze(randi_range(2, 3))
+				
+			var should_harden = randi_range(0, 100) < harden_probability
+			if should_harden:
+				piece.harden()
 				
 			# repeat until no matches
 			var max_loops = 100
@@ -382,8 +387,11 @@ func destroy_matched():
 			if all_pieces[i][j] != null and all_pieces[i][j].matched:
 				was_matched = true
 				count_matched += 1
-				all_pieces[i][j].queue_free()
-				all_pieces[i][j] = null
+				if all_pieces[i][j].is_destroyed():
+					all_pieces[i][j].queue_free()
+					all_pieces[i][j] = null
+				else:
+					all_pieces[i][j].matched = false
 				
 	score += count_matched * 10 
 	final_score += count_matched * 10

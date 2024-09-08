@@ -1,10 +1,21 @@
-[gd_scene load_steps=3 format=3 uid="uid://b0obaufki3l2d"]
+[gd_scene load_steps=6 format=3 uid="uid://b0obaufki3l2d"]
 
 [ext_resource type="PackedScene" uid="uid://dimhfx4c1igfv" path="res://scenes/piece.tscn" id="1_d71qm"]
+[ext_resource type="Shader" path="res://shaders/dark.gdshader" id="2_5xeuh"]
 [ext_resource type="Texture2D" uid="uid://c2rtbqonf0tk7" path="res://assets/pieces/Pink Piece.png" id="2_qy17r"]
+[ext_resource type="Texture2D" uid="uid://brwnxir7wdq74" path="res://assets/pieces/block_piece.png" id="3_vd3mb"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_7euyd"]
+shader = ExtResource("2_5xeuh")
+shader_parameter/color_modulate = Vector4(1, 1, 1, 1)
 
 [node name="PinkPiece" instance=ExtResource("1_d71qm")]
+material = SubResource("ShaderMaterial_7euyd")
 color = "pink"
 
 [node name="Sprite2D" parent="." index="0"]
 texture = ExtResource("2_qy17r")
+
+[node name="Block" type="Sprite2D" parent="." index="1"]
+visible = false
+texture = ExtResource("3_vd3mb")
