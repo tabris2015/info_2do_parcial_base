@@ -393,7 +393,7 @@ func generate_special():
 	for group in groups:
 		group = uniqueArray(group)
 		if group.size() >= 4:
-			var special
+			var special = group[0]
 			for piece in group:
 				var x = piece[0][0]
 				var y = piece[0][1]

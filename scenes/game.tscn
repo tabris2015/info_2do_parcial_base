@@ -4,7 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://bt33j5dwxano3" path="res://scenes/top_ui.tscn" id="2_wrbvl"]
 [ext_resource type="Texture2D" uid="uid://cdunkljd6up72" path="res://assets/bottom_ui.png" id="3_jy0d4"]
 [ext_resource type="Script" path="res://scripts/grid.gd" id="4_4jr62"]
-[ext_resource type="PackedScene" uid="uid://3ydti7c60ouq" path="res://scenes/end_game.tscn" id="5_5q4mv"]
+[ext_resource type="PackedScene" path="res://scenes/end_game.tscn" id="5_5q4mv"]
 
 [node name="Game" type="Node2D"]
 
